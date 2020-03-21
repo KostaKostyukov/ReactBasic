@@ -4,7 +4,9 @@ import Person from "../Components/Persons/Person/Person";
 import person from "../Components/Persons/Person/Person";
 import Persons from "../Components/Persons/Persons";
 import Cockpit from "../Components/Persons/Cockpit/Cockpit";
-import WithClass from "../HOC/WithClass";
+import withClass from "../HOC/WithClass";
+import Auxi from "../HOC/Auxiliry";
+import AuthContext from "../Context/auth-context";
 
 class App extends Component {
   constructor(props) {
@@ -16,20 +18,22 @@ class App extends Component {
       {
         id: "jhjhdfsf",
         name: "kosta",
-        age: "23"
+        age: 23
       },
       {
         id: "jhjhdfsfqrq",
         name: "katia",
-        age: "29"
+        age: 29
       },
       {
         id: "jhjhdfsfsxggqrq",
         name: "kajksjfas",
-        age: "29"
+        age: 29
       }
     ],
-    showPersons: false
+    showPersons: false,
+    changeCounter: 0,
+    autho: false
   };
 
   static getDerivedStateFromProps(props, state) {
@@ -47,6 +51,9 @@ class App extends Component {
     } else return false; */
     return true;
   }
+  loginHandler = () => {
+    this.setState({ autho: true });
+  };
   togglePersonsHandler = () => {
     const doesShow = this.state.showPersons;
     this.setState({
@@ -68,8 +75,11 @@ class App extends Component {
     person.name = event.target.value;
     const persons = [...this.state.persons];
     persons[personIndex] = person;
-    this.setState({
-      persons: persons
+    this.setState((prevState, props) => {
+      return {
+        persons: persons,
+        changeCounter: this.state.changeCounter + 1
+      };
     });
   };
   render() {
@@ -82,6 +92,7 @@ class App extends Component {
           persons={this.state.persons}
           clicked={this.deletePersonHandler}
           changed={this.nameChangeHandler}
+          isAutho={this.state.autho}
         ></Persons>
       );
       //      btnClass.push(classes.Red);
@@ -89,19 +100,22 @@ class App extends Component {
 
     return (
       //<div className={classes.App}>
-      <WithClass classes={classes.App}>
-        <Cockpit
-          title={this.props.appTitle}
-          showPersons={this.state.showPersons}
-          persons={this.state.persons}
-          clicked={this.togglePersonsHandler}
-        ></Cockpit>
-        {persons}
-      </WithClass>
-
+      <Auxi>
+        <AuthContext.Provider
+          value={{ autho: this.state.autho, login: this.loginHandler }}
+        >
+          <Cockpit
+            title={this.props.appTitle}
+            showPersons={this.state.showPersons}
+            persons={this.state.persons}
+            clicked={this.togglePersonsHandler}
+          ></Cockpit>
+          {persons}
+        </AuthContext.Provider>
+      </Auxi>
       //</div>
     );
   }
 }
 
-export default App;
+export default withClass(App, classes.App);
